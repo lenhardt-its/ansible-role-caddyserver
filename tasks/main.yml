@@ -1,0 +1,162 @@
+---
+- name: check if caddy is installed
+  stat:
+    path: "/usr/local/bin/caddyserver"
+  register: __caddy_is_installed
+  become: true
+  tags: caddy
+
+- name: create group
+  group:
+    name: "{{ caddy_group }}"
+    system: true
+    state: present
+  when: caddy_group != "root" and (not __caddy_is_installed.stat.exists)
+  become: true
+  tags: caddy
+
+- name: create user
+  user:
+    name: "{{ caddy_user }}"
+    system: true
+    shell: "/sbin/nologin"
+    group: "{{ caddy_group }}"
+    createhome: false
+  when: caddy_user != "root" and (not __caddy_is_installed.stat.exists)
+  become: true
+  tags: caddy
+
+- name: create default directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: 0755
+  with_items:
+    - /etc/caddy
+    - /etc/caddy/conf.d
+    - /var/lib/caddy
+    - /var/lib/caddy/.storage
+    - /var/www
+    - /var/log/caddy
+  become: true
+  tags: caddy
+
+- name: copy binary file
+  copy:
+    src: "caddyserver"
+    dest: "/usr/local/bin/caddy"
+    owner: root
+    group: root
+    mode: 0755
+  when: not __caddy_is_installed.stat.exists
+  become: true
+  tags: caddy
+
+- name: copy basic html not_allowed and logo file
+  copy:
+    src: "{{ item }}"
+    dest: "/var/www/{{ item }}"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: 0644
+  with_items:
+    - index.html
+  become: true
+  tags: caddy
+
+- name: configure logrotate
+  template:
+    src: caddy_logrotate.conf.j2
+    dest: "/etc/logrotate.d/caddy"
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  tags: caddy
+
+- name: create config
+  template:
+    src: caddy.conf.j2
+    dest: /etc/caddy/caddy.conf
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: 0644
+  notify: restart caddy
+  become: true
+  tags: caddy
+
+- name: create custom directories
+  file:
+    path: "{{ item.folder }}"
+    state: directory
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: 0755
+  with_items: "{{ caddy_config }}"
+  when: caddy_config is defined
+  become: true
+  tags: caddy
+
+- name: create custom configs
+  template:
+    src: caddy.custom.conf.j2
+    dest: "/etc/caddy/conf.d/vhost_{{ item.name }}.conf"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: 0644
+  with_items: "{{ caddy_config }}"
+  when: caddy_config is defined
+  notify: reload caddy
+  become: true
+  tags: caddy
+
+- name: copy custom items
+  copy:
+    src: "{{ item.copy_item }}"
+    dest: "{{ item.folder }}/{{ item.copy_item }}"
+    owner: "{{ caddy_user }}"
+    group: "{{ caddy_group }}"
+    mode: 0644
+  with_items: "{{ caddy_config }}"
+  when:
+    - caddy_config is defined
+    - item.copy_item is defined
+  notify: reload caddy
+  become: true
+  tags: caddy
+
+- name: create systemd unit
+  template:
+    src: caddy.service.j2
+    dest: /etc/systemd/system/caddy.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart caddy
+  become: true
+  tags: caddy
+
+- name: start and enable service
+  systemd:
+    daemon_reload: true
+    name: caddy
+    state: started
+    enabled: true
+  become: true
+  tags: caddy
+
+- name: configure consul services
+  template:
+    src: consul.service.json.j2
+    dest: "/etc/consul.d/{{ item.name.split(\"-\")[1] }}.json"
+    owner: consul
+    group: consul
+    mode: 0644
+  with_items: "{{ consul_service_config }}"
+  notify: reload consul
+  become: true
+  tags:
+    - caddy
+    - consul

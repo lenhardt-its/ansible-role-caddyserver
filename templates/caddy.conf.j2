@@ -1,0 +1,33 @@
+{{ ansible_managed | comment }}
+
+{
+  experimental_http3
+  auto_https off
+  storage file_system {
+    root /var/lib/caddy/.storage
+  }
+}
+
+:{{ caddy_default_http_port }} {
+  root * /var/www/
+  file_server
+  metrics /metrics
+  log {
+    format json
+    output file /var/log/caddy/access.log
+  }
+  redir /proxypac/proxy.pac /proxy.pac 301
+  redir /proxypac/wpad.dat  /wpad.dat  301
+  route {
+    header /proxy.pac Content-Type "application/x-ns-proxy-autoconfig"
+    header /wpad.dat  Content-Type "application/x-ns-proxy-autoconfig"
+  }
+{% if caddy_basic_auth %}
+  @basicauthpath path {{ caddy_basic_auth_paths }}
+  basicauth @basicauthpath {
+    {{ caddy_basic_auth_user }} {{ caddy_basic_auth_pass }}
+  }
+{% endif %}
+}
+
+import conf.d/*

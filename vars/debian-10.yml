@@ -1,0 +1,4 @@
+---
+caddy_packages:
+  - git
+  - libcap2-bin

@@ -1,0 +1,42 @@
+---
+# Define caddyserver defaults
+caddy_group: caddy
+caddy_user: caddy
+caddy_logrotate_days: 28
+caddy_default_http_port: 80
+caddy_basic_auth: true
+caddy_basic_auth_user: proxy
+caddy_basic_auth_pass: "wek02Zi9FdE11" # generate pass with caddy hash-password
+caddy_basic_auth_paths: "/socks.html /squid.html /squid_acls"
+caddy_config: []
+#  - name: squid
+#    http_port: 8080
+#    folder: /var/www/squid
+#    content: |
+#      root * /var/www/squid
+#      file_server
+#  - name: pac
+#    http_port: 8081
+#    folder: /var/www/pac
+#    content: |
+#      root * /var/www/pac
+#      file_server
+
+# Configure single Consul service
+consul_service_config:
+  - name: "monitoring-caddy_exporter"
+    port: "{{ caddy_default_http_port }}"
+    address: "{{ ansible_hostname }}.{{ ansible_domain }}"
+    meta:
+      __metrics_path__: "/metrics"
+      __scheme__: "http"
+      environment: "{{ ansible_environment }}"
+      product: "{{ ansible_product }}"
+      owner_email: "{{ ansible_contact_mail }}"
+      owner_jira: "{{ ansible_contact_jira }}"
+      alert_scc: "{{ ansible_alert_scc | string | lower }}"
+    check:
+      args: ["curl","-s","-L","-o","/dev/null","-w","%{http_code}","-LI","localhost:{{ caddy_default_http_port }}"]
+      interval: "60s"
+      timeout: "10s"
+    tags: ["prometheus","metrics"]
