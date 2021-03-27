@@ -154,6 +154,15 @@
     - ansible_os_family == 'Debian'
   tags: caddy
 
+- name: check whether firewalld status is active
+  command: "firewall-cmd --state"
+  changed_when: False
+  ignore_errors: True
+  register: _firewalld_status
+  become: true
+  when: ansible_os_family == 'RedHat'
+  tags: caddy
+
 - name: configure ufw
   community.general.ufw:
     rule: allow
@@ -181,6 +190,7 @@
     - 80
     - 443
   when:
+    - "'running' in _firewalld_status.stdout"
     - caddy_allow_firewall
     - ansible_os_family == 'RedHat'
   notify: reload firewalld
