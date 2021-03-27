@@ -40,11 +40,21 @@ The default webroot folder is `/var/www` and the default logfolder is `/var/log/
 
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
-| `caddy_user` | caddy | Caddy user |
-| `caddy_group` | caddy | Caddy group |
+| `caddy_system_group` | caddy | Caddy user |
+| `caddy_system_user` | caddy | Caddy group |
 | `caddy_logrotate_days` | 28 | Caddy logrotate rotate days |
-| `caddy_default_http_port` | 80 | Caddy default http port |
+| `caddy_binary_local_dir` | /usr/local/bin | default bin dir |
 | `caddy_config` | [] | caddy config |
+| `caddy_config_path` | /etc/caddy | default config dir |
+| `caddy_log_path` | /var/log/caddy | default log dir |
+| `caddy_data_path` | /var/www | default webroot |
+| `caddy_storage_path` | /var/lib/caddy | caddy internal storage path |
+| `caddy_auto_https` | on | default auto https on/off |
+| `caddy_vhost_defaults` | [defaults/main.yml#L21](defaults/main.yml#L21) | default vhost params |
+| `caddy_tls_dns_cloudflare_enabled` | false | enable cloudflare tls |
+| `cloudflare_token` | xxx |  |
+| `caddy_env_vars` | ['CLOUDFLARE_API_TOKEN={{ cloudflare_token }}'] | see defaults |
+| `caddy_vhosts` | [] | define vhosts configs |
 
 ## Example
 
@@ -55,6 +65,18 @@ The default webroot folder is `/var/www` and the default logfolder is `/var/log/
 - hosts: all
   roles:
   - onkeldom.caddyserver
+  vars:
+    caddy_vhosts:
+      - name: site1
+        hostname: site1.domain.tld
+        proxy_host: http://10.0.0.1
+        gzip: compress
+        security_headers: true
+        responds: ['/forbidden 403']
+        rewrites: ['* /path{uri}']
+      - name: site2
+        hostname: site1.domain.tld
+        template: custom_template.j2
 ```
 
 ## Contributing
