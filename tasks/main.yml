@@ -206,7 +206,7 @@
   when:
     - caddy_allow_firewall
     - _firewalld_caddy_state['changed']
-    - - ansible_os_family == 'RedHat'
+    - ansible_os_family == 'RedHat'
   become: true
   tags: caddy
 

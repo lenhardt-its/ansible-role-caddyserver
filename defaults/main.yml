@@ -16,9 +16,6 @@ cloudflare_token: xxx
 caddy_env_vars:
   - 'CLOUDFLARE_API_TOKEN={{ cloudflare_token }}'
 
-# Environment Vars
-caddy_env_vars: []
-
 # Vhosts
 caddy_vhosts: []
 caddy_vhost_defaults:
