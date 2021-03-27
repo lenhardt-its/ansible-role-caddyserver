@@ -20,3 +20,10 @@
     state: reloaded
   tags: caddy
   become: true
+
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+  tags: caddy
+  become: true
