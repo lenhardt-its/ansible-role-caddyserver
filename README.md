@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg?style=flat)](https://opensource.org/licenses/MIT)
 [![GitHub issues](https://img.shields.io/github/issues/OnkelDom/ansible-role-caddyserver?style=flat)](https://github.com/OnkelDom/ansible-role-caddyserver/issues)
 [![GitHub tag](https://img.shields.io/github/tag/OnkelDom/ansible-role-caddyserver.svg?style=flat)](https://github.com/OnkelDom/ansible-role-caddyserver/tags)
-[![GitHub Actiob](https://github.com/OnkelDom/ansible-role-caddyserver/workflows/ansible-lint/badge.svg)](https://github.com/OnkelDom/ansible-role-caddyserver)
+[![GitHub action](https://github.com/OnkelDom/ansible-role-caddyserver/workflows/ansible-lint/badge.svg)](https://github.com/OnkelDom/ansible-role-caddyserver)
 
 ## Description
 
