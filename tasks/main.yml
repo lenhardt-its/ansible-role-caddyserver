@@ -1,28 +1,28 @@
 ---
 - name: check if caddy is installed
   stat:
-    path: "/usr/local/bin/caddyserver"
+    path: "{{ caddy_binary_local_dir }}/caddyserver"
   register: __caddy_is_installed
   become: true
   tags: caddy
 
 - name: create group
   group:
-    name: "{{ caddy_group }}"
+    name: "{{ caddy_system_group }}"
     system: true
     state: present
-  when: caddy_group != "root" and (not __caddy_is_installed.stat.exists)
+  when: caddy_system_group != "root" and (not __caddy_is_installed.stat.exists)
   become: true
   tags: caddy
 
 - name: create user
   user:
-    name: "{{ caddy_user }}"
+    name: "{{ caddy_system_user }}"
     system: true
     shell: "/sbin/nologin"
-    group: "{{ caddy_group }}"
+    group: "{{ caddy_system_group }}"
     createhome: false
-  when: caddy_user != "root" and (not __caddy_is_installed.stat.exists)
+  when: caddy_system_user != "root" and (not __caddy_is_installed.stat.exists)
   become: true
   tags: caddy
 
@@ -30,23 +30,23 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ caddy_user }}"
-    group: "{{ caddy_group }}"
+    owner: "{{ caddy_system_user }}"
+    group: "{{ caddy_system_group }}"
     mode: 0755
   with_items:
-    - /etc/caddy
-    - /etc/caddy/conf.d
-    - /var/lib/caddy
-    - /var/lib/caddy/.storage
-    - /var/www
-    - /var/log/caddy
+    - "{{ caddy_config_path }}"
+    - "{{ caddy_config_path }}/conf.d"
+    - "{{ caddy_log_path }}"
+    - "{{ caddy_data_path }}"
+    - "{{ caddy_storage_path }}"
+    - "{{ caddy_storage_path }}/.storage"
   become: true
   tags: caddy
 
 - name: copy binary file
   copy:
     src: "caddyserver_{{ go_arch }}"
-    dest: "/usr/local/bin/caddy"
+    dest: "{{ caddy_binary_local_dir }}/caddy"
     owner: root
     group: root
     mode: 0755
@@ -54,12 +54,12 @@
   become: true
   tags: caddy
 
-- name: copy basic html not_allowed and logo file
+- name: copy web folder files
   copy:
     src: "{{ item }}"
-    dest: "/var/www/{{ item }}"
-    owner: "{{ caddy_user }}"
-    group: "{{ caddy_group }}"
+    dest: "{{ caddy_data_path }}/{{ item }}"
+    owner: "{{ caddy_system_user }}"
+    group: "{{ caddy_system_group }}"
     mode: 0644
   with_items:
     - index.html
@@ -79,53 +79,37 @@
 - name: create config
   template:
     src: caddy.conf.j2
-    dest: /etc/caddy/caddy.conf
-    owner: "{{ caddy_user }}"
-    group: "{{ caddy_group }}"
+    dest: "{{ caddy_config_path }}/caddy.conf"
+    owner: "{{ caddy_system_user }}"
+    group: "{{ caddy_system_group }}"
     mode: 0644
-  notify: restart caddy
+    validate: "{{ caddy_binary_local_dir }}/caddy validate -config %s -adapter caddyfile"
+  notify: reload caddy
   become: true
   tags: caddy
 
-- name: create custom directories
-  file:
-    path: "{{ item.folder }}"
-    state: directory
-    owner: "{{ caddy_user }}"
-    group: "{{ caddy_group }}"
-    mode: 0755
-  with_items: "{{ caddy_config }}"
-  when: caddy_config is defined
-  become: true
-  tags: caddy
-
-- name: create custom configs
+- name: create tls configs
   template:
-    src: caddy.custom.conf.j2
-    dest: "/etc/caddy/conf.d/vhost_{{ item.name }}.conf"
-    owner: "{{ caddy_user }}"
-    group: "{{ caddy_group }}"
+    src: caddy.tls.conf.j2
+    dest: "{{ caddy_config_path }}/conf.d/tls.conf"
+    owner: "{{ caddy_system_user }}"
+    group: "{{ caddy_system_group }}"
     mode: 0644
-  with_items: "{{ caddy_config }}"
-  when: caddy_config is defined
+    validate: "{{ caddy_binary_local_dir }}/caddy validate -config %s -adapter caddyfile"
   notify: reload caddy
   become: true
   tags: caddy
 
-- name: copy custom items
-  copy:
-    src: "{{ item.copy_item }}"
-    dest: "{{ item.folder }}/{{ item.copy_item }}"
-    owner: "{{ caddy_user }}"
-    group: "{{ caddy_group }}"
-    mode: 0644
-  with_items: "{{ caddy_config }}"
-  when:
-    - caddy_config is defined
-    - item.copy_item is defined
+- include_tasks: vhosts.yml
+  vars:
+    vhost: '{{ caddy_vhost_defaults | combine(vhost_) }}'
+  loop: '{{ caddy_vhosts }}'
+  loop_control:
+    loop_var: vhost_
   notify: reload caddy
-  become: true
-  tags: caddy
+  tags:
+    - caddy
+    - caddy_vhosts
 
 - name: create systemd unit
   template:
@@ -143,11 +127,13 @@
     path: "{{ caddy_binary_install_dir }}/caddy"
     capability: CAP_NET_BIND_SERVICE+ep
     state: present
-  when: caddy_web_listen_port <= 1024
+  tags: caddy
 
 - name: allow binding to port in selinux
   seport:
-    ports: "{{ caddy_web_listen_port }}"
+    ports:
+      - 80
+      - 443
     proto: tcp
     setype: http_port_t
     state: present
@@ -171,11 +157,14 @@
 - name: configure ufw
   community.general.ufw:
     rule: allow
-    port: "{{ caddy_web_listen_port }}"
+    port: "{{ item }}"
     proto: tcp
     state: enabled
     comment: "caddy"
   notify: reload ufw
+  with_items:
+    - 80
+    - 443
   become: true
   tags: caddy
   register: "_firewalld_caddy_state"
@@ -197,9 +186,12 @@
 
 - name: configure firewalld
   firewalld:
-    port: "{{ caddy_web_listen_port }}/tcp"
+    port: "{{ item }}/tcp"
     permanent: yes
     state: true
+  with_items:
+    - 80
+    - 443
   when:
     - caddy_allow_firewall
     - ansible_os_family == 'RedHat'
@@ -226,17 +218,3 @@
     enabled: true
   become: true
   tags: caddy
-
-- name: configure consul services
-  template:
-    src: consul.service.json.j2
-    dest: "/etc/consul.d/{{ item.name.split(\"-\")[1] }}.json"
-    owner: consul
-    group: consul
-    mode: 0644
-  with_items: "{{ consul_service_config }}"
-  notify: reload consul
-  become: true
-  tags:
-    - caddy
-    - consul

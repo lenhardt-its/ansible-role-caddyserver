@@ -1,5 +1,5 @@
 {{ ansible_managed | comment }}
-/var/log/caddy/*.log {
+{{ caddy_log_path }}/*.log {
     daily
     compress
     delaycompress

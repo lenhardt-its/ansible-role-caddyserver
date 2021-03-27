@@ -1,0 +1,11 @@
+---
+- name: add vhosts
+  template:
+    src: '{{ vhost.template }}'
+    dest: '{{ caddy_config_path }}/vhosts/{{ vhost.name }}'
+    owner: "{{ caddy_system_user }}"
+    group: "{{ caddy_system_group }}"
+    mode: 0644
+    validate: "{{ caddy_binary_local_dir }}/caddy validate -config %s -adapter caddyfile"
+  notify: caddy reload
+  tags: caddy.vhosts

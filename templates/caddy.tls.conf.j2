@@ -1,0 +1,6 @@
+{{ ansible_managed | comment(decoration="# ") }}
+tls {
+  {% if caddy_tls_dns_cloudflare_enabled -%}
+  dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+  {% endif -%}
+}

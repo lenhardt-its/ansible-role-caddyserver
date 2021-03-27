@@ -1,0 +1,4 @@
+- name: Test Action
+  hosts: all
+  roles:
+    - ansible-role-caddyserver

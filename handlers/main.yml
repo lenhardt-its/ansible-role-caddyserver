@@ -13,12 +13,3 @@
     state: reloaded
   tags: caddy
   become: true
-
-- name: reload consul
-  systemd:
-    name: consul
-    state: reloaded
-  become: true
-  tags:
-    - caddy
-    - consul

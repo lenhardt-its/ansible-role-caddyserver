@@ -1,3 +1,10 @@
-{{ ansible_managed | comment }}
+{{ ansible_managed | comment(decoration="# ") }}
 
-{{ caddy_config }}
+{
+  auto_https {{ caddy_auto_https | default('on') }}
+  storage file_system {
+    root {{ caddy_storage_path }}/.storage
+  }
+}
+
+import vhosts.d/*

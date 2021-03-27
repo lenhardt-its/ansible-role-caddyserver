@@ -1,52 +1,45 @@
 ---
 # Define caddyserver defaults
-caddy_group: caddy
-caddy_user: caddy
+caddy_system_group: caddy
+caddy_system_user: caddy
+caddy_binary_local_dir: /usr/local/bin
 caddy_logrotate_days: 28
-caddy_default_http_port: 80
-caddy_config: |
-  {
-    auto_https off
-    storage file_system {
-      root /var/lib/caddy/.storage
-    }
-    order cgi last
-  }
-  :80 {
-    root * /var/www/
-    file_server
-    metrics /metrics
-    log {
-      format json
-      output file /var/log/caddy/access.log
-    }
-    @forbidden {
-      remote_ip 172.0.0.0/8
-    }
-    respond @forbidden You are blocked to access the Webserver 403
-    @allowed {
-      not remote_ip 192.168.0.0/16
-    }
-    respond @allowed "Not on allowed list" 403
-    redir /proxypac/proxy.pac /proxy.pac 301
-    redir /proxypac/wpad.dat  /wpad.dat  301
-    route {
-      header /proxy.pac Content-Type "application/x-ns-proxy-autoconfig"
-      header /wpad.dat  Content-Type "application/x-ns-proxy-autoconfig"
-    }
-    @basicauthpath path /var/www
-    basicauth @basicauthpath {
-      caddyserver wek02Zi9FdE11 # generate pass with caddy hash-password
-    }
-  }
-  :8081 {
-    root * /var/www/cgi-bin
-    metrics /metrics
-    log {
-      format json
-      output file /var/log/caddy/access_cgi.log
-    }
-    cgi /cgi-bin/* /var/www/cgi-bin/squidguard.cgi {
-      script_name /cgi-bin/squidguard.cgi
-    }
-  }
+caddy_config_path: /etc/caddy
+caddy_log_path: /var/log/caddy
+caddy_data_path: /var/www
+caddy_storage_path: /var/lib/caddy
+caddy_auto_https: on
+
+# TLS
+caddy_tls_dns_cloudflare_enabled: false
+cloudflare_token: xxx
+caddy_env_vars:
+  - 'CLOUDFLARE_API_TOKEN={{ cloudflare_token }}'
+
+# Environment Vars
+caddy_env_vars: []
+
+# Vhosts
+caddy_vhosts: []
+caddy_vhost_defaults:
+  #hostname: "{{ ansible_hostname }}.{{ ansible_domain }}"
+  template: caddy.vhosts.conf.j2
+  compress: true
+  proxy_host: null
+  proxy_transparent_disable: false
+  security_headers: false
+  basicauth: false
+  basicauth_path: '/'
+  www_redir: false
+  root: null
+  php_fastcgi_enabled: null
+  php_fastcgi_path: null
+  responds: []
+  rewrites: []
+  file_server: false
+  file_server_browse: false
+  protected_enabled: false
+  protected_remote_ips: []
+  protected_header_name: null
+  protected_header_value: null
+  bind: null
