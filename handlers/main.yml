@@ -13,3 +13,10 @@
     state: reloaded
   tags: caddy
   become: true
+
+- name: reload ufw
+  systemd:
+    name: ufw
+    state: reloaded
+  tags: caddy
+  become: true
