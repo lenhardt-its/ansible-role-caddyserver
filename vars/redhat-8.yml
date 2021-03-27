@@ -1,3 +1,6 @@
 ---
+caddy_selinux_packages:
+  - python3-libselinux
+  - python3-policycoreutils
 caddy_packages:
   - git

@@ -1,9 +1,0 @@
-{{ ansible_managed | comment }}
-
-:{{ item.http_port }} {
-  {{ item.content }}
-  log {
-    format json
-    output file /var/log/caddy/access_{{ item.name }}.log
-  }
-}

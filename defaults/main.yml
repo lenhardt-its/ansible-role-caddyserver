@@ -4,39 +4,49 @@ caddy_group: caddy
 caddy_user: caddy
 caddy_logrotate_days: 28
 caddy_default_http_port: 80
-caddy_basic_auth: true
-caddy_basic_auth_user: proxy
-caddy_basic_auth_pass: "wek02Zi9FdE11" # generate pass with caddy hash-password
-caddy_basic_auth_paths: "/socks.html /squid.html /squid_acls"
-caddy_config: []
-#  - name: squid
-#    http_port: 8080
-#    folder: /var/www/squid
-#    content: |
-#      root * /var/www/squid
-#      file_server
-#  - name: pac
-#    http_port: 8081
-#    folder: /var/www/pac
-#    content: |
-#      root * /var/www/pac
-#      file_server
-
-# Configure single Consul service
-consul_service_config:
-  - name: "monitoring-caddy_exporter"
-    port: "{{ caddy_default_http_port }}"
-    address: "{{ ansible_hostname }}.{{ ansible_domain }}"
-    meta:
-      __metrics_path__: "/metrics"
-      __scheme__: "http"
-      environment: "{{ ansible_environment }}"
-      product: "{{ ansible_product }}"
-      owner_email: "{{ ansible_contact_mail }}"
-      owner_jira: "{{ ansible_contact_jira }}"
-      alert_scc: "{{ ansible_alert_scc | string | lower }}"
-    check:
-      args: ["curl","-s","-L","-o","/dev/null","-w","%{http_code}","-LI","localhost:{{ caddy_default_http_port }}"]
-      interval: "60s"
-      timeout: "10s"
-    tags: ["prometheus","metrics"]
+caddy_config: |
+  {
+    auto_https off
+    storage file_system {
+      root /var/lib/caddy/.storage
+    }
+    order cgi last
+  }
+  :80 {
+    root * /var/www/
+    file_server
+    metrics /metrics
+    log {
+      format json
+      output file /var/log/caddy/access.log
+    }
+    @forbidden {
+      remote_ip 172.0.0.0/8
+    }
+    respond @forbidden You are blocked to access the Webserver 403
+    @allowed {
+      not remote_ip 192.168.0.0/16
+    }
+    respond @allowed "Not on allowed list" 403
+    redir /proxypac/proxy.pac /proxy.pac 301
+    redir /proxypac/wpad.dat  /wpad.dat  301
+    route {
+      header /proxy.pac Content-Type "application/x-ns-proxy-autoconfig"
+      header /wpad.dat  Content-Type "application/x-ns-proxy-autoconfig"
+    }
+    @basicauthpath path /var/www
+    basicauth @basicauthpath {
+      caddyserver wek02Zi9FdE11 # generate pass with caddy hash-password
+    }
+  }
+  :8081 {
+    root * /var/www/cgi-bin
+    metrics /metrics
+    log {
+      format json
+      output file /var/log/caddy/access_cgi.log
+    }
+    cgi /cgi-bin/* /var/www/cgi-bin/squidguard.cgi {
+      script_name /cgi-bin/squidguard.cgi
+    }
+  }

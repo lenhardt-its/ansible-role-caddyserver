@@ -1,12 +1,34 @@
-# Ansible Role: caddyserver
+# Ansible Role: Caddyserver v2.3.0 (currently static file for amd64, arm64, armv7)
+
+[![ubuntu-18](https://img.shields.io/badge/ubuntu-18.x-orange?style=flat&logo=ubuntu)](https://ubuntu.com/)
+[![ubuntu-20](https://img.shields.io/badge/ubuntu-20.x-orange?style=flat&logo=ubuntu)](https://ubuntu.com/)
+[![debian-9](https://img.shields.io/badge/debian-9.x-orange?style=flat&logo=debian)](https://www.debian.org/)
+[![debian-10](https://img.shields.io/badge/debian-10.x-orange?style=flat&logo=debian)](https://www.debian.org/)
+[![centos-7](https://img.shields.io/badge/centos-7.x-orange?style=flat&logo=centos)](https://www.centos.org/)
+[![centos-8](https://img.shields.io/badge/centos-8.x-orange?style=flat&logo=centos)](https://www.centos.org/)
+[![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg?style=flat)](https://opensource.org/licenses/MIT)
+[![GitHub issues](https://img.shields.io/github/issues/OnkelDom/ansible-role-caddyserver?style=flat)](https://github.com/OnkelDom/ansible-role-caddyserver/issues)
+[![GitHub tag](https://img.shields.io/github/tag/OnkelDom/ansible-role-caddyserver.svg?style=flat)](https://github.com/OnkelDom/ansible-role-caddyserver/tags)
 
 ## Description
 
 Install and configure caddyserver using ansible.
 
+Plugins:
+ * caddy-ext_ratelimit
+ * caddy-yaml
+ * caddy-cgi_v2
+ * caddyserver_ntlm-transport
+ * caddy-authz_v2
+ * caddy-auth-portal
+ * caddy-docker-proxy_plugin_v2
+ * caddy2-proxyprotocol
+ * caddy2-filter
+
 ## Requirements
 
-- Ansible >= 2.5 (It might work on previous versions, but we cannot guarantee it)
+- Ansible >= 2.9 (It might work on previous versions, but we cannot guarantee it)
+- Community Packages: `ansible-galaxy collection install community.general`
 
 ## Role Variables
 
@@ -20,25 +42,9 @@ The default webroot folder is `/var/www` and the default logfolder is `/var/log/
 | `caddy_group` | caddy | Caddy group |
 | `caddy_logrotate_days` | 28 | Caddy logrotate rotate days |
 | `caddy_default_http_port` | 80 | Caddy default http port |
-| `caddy_basic_auth` | true | Caddy enable basic auth |
-| `caddy_basic_auth_user` | proxy | Caddy basic auth user |
-| `caddy_basic_auth_pass` | "JDJhJDE0JHJ0VEF6ZldHWEI5RWs3UUk1amptL09mcVRua0I5QmI1SFlZL3ltRTBJN0twek02Zi9FdE11" | Caddy basic auth pass (generate with caddy hash-paddword |
-| `caddy_basic_auth_paths` | "/socks.html /squid.html /squid_acls" | Caddy basic auth pathes |
+| `caddy_config` | [] | caddy config |
 
 ## Example
-
-```yaml
----
-# Define caddyserver custom vhosts
-caddy_config:
-  - name: custom
-    http_port: 8081
-    folder: /var/www/<folder>
-    # caddy.custom.conf
-    content: |
-      root * /var/www/<folder>
-      file_server
-```
 
 ### Playbook
 
@@ -46,7 +52,7 @@ caddy_config:
 ---
 - hosts: all
   roles:
-  - ansible-role-caddyserver
+  - onkeldom.caddyserver
 ```
 
 ## Contributing

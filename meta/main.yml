@@ -1,0 +1,28 @@
+---
+galaxy_info:
+  role_name: caddyserver
+  author: Dominik Lenhardt
+  description: Ansible role for installing and configuring Caddyserver
+  license: "MIT"
+  min_ansible_version: 2.9
+  platforms:
+    - name: EL
+      versions:
+        - 7
+        - 8
+    - name: Debian
+      versions:
+        - buster
+        - stretch
+    - name: Ubuntu
+      versions:
+        - focal
+        - bionic
+  galaxy_tags:
+  - system
+  - network
+  - linux
+  - webserver
+  - caddy
+  - caddyserver
+dependencies: []
