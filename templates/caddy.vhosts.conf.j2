@@ -63,7 +63,7 @@ www.{{ vhost.hostname }} {
   php_fastcgi unix//run/php/php-fpm-{{ vhost.name }}.sock
 {% endif %}
 {% endif %}
-{%- if vhost.security_headers %}
+{% if vhost.security_headers %}
   header {
     # enable HSTS
     Strict-Transport-Security max-age=31536000;
@@ -78,7 +78,7 @@ www.{{ vhost.hostname }} {
     Referrer-Policy no-referrer-when-downgrade
   }
 {% endif %}
-{%- if vhost.basicauth %}
+{% if vhost.basicauth %}
   basicauth {{ vhost.basicauth_path }}* {
     {{ vhost.basicauth_user }} {{ vhost.basicauth_password }}
   }
@@ -86,5 +86,4 @@ www.{{ vhost.hostname }} {
 {% if vhost.protected_enabled %}
   respond 403
 {% endif %}
-
 }
