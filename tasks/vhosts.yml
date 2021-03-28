@@ -1,5 +1,5 @@
 ---
-- name: add vhosts
+- name: "add vhosts for {{ vhost.name }}"
   template:
     src: '{{ vhost.template }}'
     dest: '{{ caddy_config_path }}/vhosts.d/{{ vhost.name }}'
