@@ -168,7 +168,9 @@
     port: "{{ item }}"
     proto: tcp
     state: enabled
-    comment: "caddy"
+    comment: "Caddyserver"
+  changed_when: False
+  ignore_errors: True
   notify: reload ufw
   with_items:
     - 80
@@ -185,6 +187,8 @@
     port: "{{ item }}/tcp"
     permanent: yes
     state: true
+  changed_when: False
+  ignore_errors: True
   with_items:
     - 80
     - 443
