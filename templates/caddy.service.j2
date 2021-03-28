@@ -6,8 +6,8 @@ Wants=network-online.target systemd-networkd-wait-online.service
 
 [Service]
 Environment="XDG_CONFIG_HOME=/var/lib"
-User={{ caddy_user }}
-Group={{ caddy_group }}
+User={{ caddy_system_user }}
+Group={{ caddy_system_group }}
 Restart=on-failure
 ExecStart={{ caddy_binary_local_dir }}caddy run -environ -config {{ caddy_config_path }}/caddy.conf -adapter caddyfile -watch
 ExecReload=/bin/kill -USR1 $MAINPID

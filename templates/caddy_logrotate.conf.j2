@@ -6,7 +6,7 @@
     rotate {{ caddy_logrotate_days }}
     missingok
     nocreate
-    create 0640 {{ caddy_user }} {{ caddy_group }}
+    create 0640 {{ caddy_system_user }} {{ caddy_system_group }}
     datext
     dateformat _%Y%m%d
     sharedscripts
