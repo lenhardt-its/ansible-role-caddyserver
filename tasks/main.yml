@@ -84,7 +84,6 @@
     owner: "{{ caddy_system_user }}"
     group: "{{ caddy_system_group }}"
     mode: 0644
-    #validate: "{{ caddy_binary_install_dir }}/caddy validate -config %s -adapter caddyfile"
   notify: reload caddy
   become: true
   tags: caddy
@@ -96,7 +95,6 @@
     owner: "{{ caddy_system_user }}"
     group: "{{ caddy_system_group }}"
     mode: 0644
-    #validate: "{{ caddy_binary_install_dir }}/caddy validate -config %s -adapter caddyfile"
   notify: reload caddy
   become: true
   tags: caddy
