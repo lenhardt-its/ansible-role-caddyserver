@@ -8,7 +8,7 @@ caddy_config_path: /etc/caddy
 caddy_log_path: /var/log/caddy
 caddy_data_path: /var/www
 caddy_storage_path: /var/lib/caddy
-caddy_auto_https: on
+caddy_auto_https: "on"
 
 # TLS
 caddy_tls_dns_cloudflare_enabled: false

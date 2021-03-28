@@ -8,4 +8,6 @@
     mode: 0644
     #validate: "{{ caddy_binary_install_dir }}/caddy validate -config %s -adapter caddyfile"
   notify: caddy reload
-  tags: caddy.vhosts
+  tags:
+    - caddy
+    - caddy_vhosts
