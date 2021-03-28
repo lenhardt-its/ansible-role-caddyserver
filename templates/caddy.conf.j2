@@ -1,7 +1,6 @@
 {{ ansible_managed | comment(decoration="# ") }}
 
 {
-  auto_https {{ caddy_auto_https | default('on') }}
   storage file_system {
     root {{ caddy_storage_path }}/.storage
   }

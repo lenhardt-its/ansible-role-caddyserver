@@ -1,12 +1,10 @@
 {{ ansible_managed | comment(decoration="# ") }}
-
 {% if vhost.www_redir %}
 www.{{ vhost.hostname }} {
     import ../conf.d/tls.conf
     redir https://{{ vhost.hostname }}{uri} permanent
 }
 {% endif %}
-
 {{ vhost.hostname }} {
   import ../conf.d/tls.conf
   {{ 'encode zstd gzip' if vhost.compress else '' }}
@@ -16,15 +14,12 @@ www.{{ vhost.hostname }} {
       # roll_disabled
     }
   }
-
 {% if vhost.bind %}
   bind {{ vhost.bind }}
 {% endif -%}
-
 {% if vhost.root %}
   root {{ vhost.root }}
 {% endif -%}
-
 {% if vhost.file_server %}
 {% if vhost.file_server_browse %}
   file_server browse
@@ -32,27 +27,22 @@ www.{{ vhost.hostname }} {
   file_server
 {% endif -%}
 {% endif -%}
-
 {% for respond in vhost.responds %}
   respond {{ respond }}
 {% endfor -%}
-
 {% for rewrite in vhost.rewrites %}
   rewrite {{ rewrite }}
 {% endfor %}
-
 {% if vhost.protected_enabled %}
   @protected {
 {% if vhost.protected_remote_ips|length > 0 %}
     remote_ip forwarded {% for ip in vhost.protected_remote_ips %}{{ ip }} {% endfor %}
-
 {% endif %}
 {% if vhost.protected_header_name %}
     header {{ vhost.protected_header_name }} {{ vhost.protected_header_value }}
 {% endif %}
   }
 {% endif %}
-
 {% if vhost.proxy_host %}
 {% if vhost.protected_enabled %}
   handle @protected {
@@ -63,11 +53,9 @@ www.{{ vhost.hostname }} {
     header_up -Host
   } {% endif %}
 {% if vhost.protected_enabled %}
-
   }
 {% endif %}
 {% endif %}
-
 {% if vhost.php_fastcgi_enabled %}
 {% if vhost.php_fastcgi_path %}
   php_fastcgi {{ vhost.php_fastcgi_path }}
@@ -75,7 +63,6 @@ www.{{ vhost.hostname }} {
   php_fastcgi unix//run/php/php-fpm-{{ vhost.name }}.sock
 {% endif %}
 {% endif %}
-
 {%- if vhost.security_headers %}
   header {
     # enable HSTS
@@ -91,13 +78,11 @@ www.{{ vhost.hostname }} {
     Referrer-Policy no-referrer-when-downgrade
   }
 {% endif %}
-
 {%- if vhost.basicauth %}
   basicauth {{ vhost.basicauth_path }}* {
     {{ vhost.basicauth_user }} {{ vhost.basicauth_password }}
   }
 {% endif %}
-
 {% if vhost.protected_enabled %}
   respond 403
 {% endif %}
