@@ -106,7 +106,6 @@
   loop: '{{ caddy_vhosts }}'
   loop_control:
     loop_var: vhost_
-  notify: reload caddy
   tags:
     - caddy
     - caddy_vhosts
