@@ -1,7 +1,7 @@
 ---
 - name: check if caddy is installed
   stat:
-    path: "{{ caddy_binary_local_dir }}/caddyserver"
+    path: "{{ caddy_binary_install_dir }}/caddyserver"
   register: __caddy_is_installed
   become: true
   tags: caddy
@@ -46,7 +46,7 @@
 - name: copy binary file
   copy:
     src: "caddyserver_{{ go_arch }}"
-    dest: "{{ caddy_binary_local_dir }}/caddy"
+    dest: "{{ caddy_binary_install_dir }}/caddy"
     owner: root
     group: root
     mode: 0755
@@ -83,7 +83,7 @@
     owner: "{{ caddy_system_user }}"
     group: "{{ caddy_system_group }}"
     mode: 0644
-    #validate: "{{ caddy_binary_local_dir }}/caddy validate -config %s -adapter caddyfile"
+    #validate: "{{ caddy_binary_install_dir }}/caddy validate -config %s -adapter caddyfile"
   notify: reload caddy
   become: true
   tags: caddy
@@ -95,7 +95,7 @@
     owner: "{{ caddy_system_user }}"
     group: "{{ caddy_system_group }}"
     mode: 0644
-    #validate: "{{ caddy_binary_local_dir }}/caddy validate -config %s -adapter caddyfile"
+    #validate: "{{ caddy_binary_install_dir }}/caddy validate -config %s -adapter caddyfile"
   notify: reload caddy
   become: true
   tags: caddy

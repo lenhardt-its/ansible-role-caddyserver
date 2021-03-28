@@ -6,6 +6,6 @@
     owner: "{{ caddy_system_user }}"
     group: "{{ caddy_system_group }}"
     mode: 0644
-    validate: "{{ caddy_binary_local_dir }}/caddy validate -config %s -adapter caddyfile"
+    #validate: "{{ caddy_binary_install_dir }}/caddy validate -config %s -adapter caddyfile"
   notify: caddy reload
   tags: caddy.vhosts

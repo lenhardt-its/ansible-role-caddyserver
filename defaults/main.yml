@@ -2,7 +2,7 @@
 # Define caddyserver defaults
 caddy_system_group: caddy
 caddy_system_user: caddy
-caddy_binary_local_dir: /usr/local/bin
+caddy_binary_install_dir: /usr/local/bin
 caddy_logrotate_days: 28
 caddy_config_path: /etc/caddy
 caddy_log_path: /var/log/caddy
