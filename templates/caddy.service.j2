@@ -9,7 +9,7 @@ Environment="XDG_CONFIG_HOME=/var/lib"
 User={{ caddy_system_user }}
 Group={{ caddy_system_group }}
 Restart=on-failure
-ExecStart={{ caddy_binary_install_dir }}caddy run -environ -config {{ caddy_config_path }}/caddy.conf -adapter caddyfile -watch
+ExecStart={{ caddy_binary_install_dir }}/caddy run -environ -config {{ caddy_config_path }}/caddy.conf -adapter caddyfile -watch
 ExecReload=/bin/kill -USR1 $MAINPID
 LimitNOFILE=8192
 PrivateDevices=true

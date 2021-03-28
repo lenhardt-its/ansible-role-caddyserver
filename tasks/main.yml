@@ -36,6 +36,7 @@
   with_items:
     - "{{ caddy_config_path }}"
     - "{{ caddy_config_path }}/conf.d"
+    - "{{ caddy_config_path }}/vhosts.d"
     - "{{ caddy_log_path }}"
     - "{{ caddy_data_path }}"
     - "{{ caddy_storage_path }}"
