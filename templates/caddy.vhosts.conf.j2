@@ -57,11 +57,20 @@ www.{{ vhost.hostname }} {
 {% if vhost.protected_enabled %}
   handle @protected {
 {% endif %}
-    reverse_proxy {{ vhost.proxy_host }}{% if vhost.proxy_transparent_disable %} {
-    header_up -X-Forwarded-For
-    header_up -X-Forwarded-Proto
-    header_up -Host
-  } {% endif %}
+    reverse_proxy { 
+      to {{ vhost.proxy_host }}
+      {% if vhost.proxy_tls_insecure %}
+      transport http {
+        tls
+        tls_insecure_skip_verify
+        read_buffer 8192
+      }
+      {% endif %}
+      {% if vhost.proxy_transparent_disable %}
+      header_up -X-Forwarded-For
+      header_up -X-Forwarded-Proto
+      header_up -Host
+    } {% endif %}
 {% if vhost.protected_enabled %}
 
   }
