@@ -16,67 +16,56 @@ www.{{ vhost.hostname }} {
       roll_disabled
     }
   }
-
 {% if vhost.bind %}
   bind {{ vhost.bind }}
 {% endif -%}
-
 {% if vhost.root %}
   root {{ vhost.root }}
-{% endif -%}
-
+{% endif %}
 {% if vhost.file_server %}
 {% if vhost.file_server_browse %}
   file_server browse
 {% else %}
   file_server
-{% endif -%}
-{% endif -%}
-
+{% endif %}
+{% endif %}
 {% for respond in vhost.responds %}
   respond {{ respond }}
-{% endfor -%}
-
+{% endfor %}
 {% for rewrite in vhost.rewrites %}
   rewrite {{ rewrite }}
 {% endfor %}
-
 {% if vhost.protected_enabled %}
   @protected {
 {% if vhost.protected_remote_ips|length > 0 %}
     remote_ip forwarded {% for ip in vhost.protected_remote_ips %}{{ ip }} {% endfor %}
-
 {% endif %}
 {% if vhost.protected_header_name %}
     header {{ vhost.protected_header_name }} {{ vhost.protected_header_value }}
 {% endif %}
   }
 {% endif %}
-
 {% if vhost.proxy_host %}
 {% if vhost.protected_enabled %}
   handle @protected {
 {% endif %}
     reverse_proxy { 
       to {{ vhost.proxy_host }}
-      {% if vhost.proxy_tls_insecure %}
+{% if vhost.proxy_tls_insecure %}
       transport http {
         tls
         tls_insecure_skip_verify
         read_buffer 8192
       }
-      {% endif %}
-      {% if vhost.proxy_transparent_disable %}
+{% endif %}
+{% if vhost.proxy_transparent_disable %}
       header_up -X-Forwarded-For
       header_up -X-Forwarded-Proto
       header_up -Host
-    } {% endif %}
-{% if vhost.protected_enabled %}
-
+    } 
+{% endif %}
   }
 {% endif %}
-{% endif %}
-
 {% if vhost.php_fastcgi_enabled %}
 {% if vhost.php_fastcgi_path %}
   php_fastcgi {{ vhost.php_fastcgi_path }}
@@ -84,8 +73,7 @@ www.{{ vhost.hostname }} {
   php_fastcgi unix//run/php/php-fpm-{{ vhost.name }}.sock
 {% endif %}
 {% endif %}
-
-{%- if vhost.security_headers %}
+{% if vhost.security_headers %}
   header {
     # enable HSTS
     Strict-Transport-Security max-age=31536000;
@@ -100,13 +88,11 @@ www.{{ vhost.hostname }} {
     Referrer-Policy no-referrer-when-downgrade
   }
 {% endif %}
-
-{%- if vhost.basicauth %}
+{% if vhost.basicauth %}
   basicauth {{ vhost.basicauth_path }}* {
     {{ vhost.basicauth_user }} {{ vhost.basicauth_password }}
   }
 {% endif %}
-
 {% if vhost.protected_enabled %}
   respond 403
 {% endif %}

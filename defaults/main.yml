@@ -24,6 +24,7 @@ caddy_vhost_defaults:
   compress: true
   proxy_host: null
   proxy_transparent_disable: false
+  proxy_tls_insecure: false
   security_headers: false
   basicauth: false
   basicauth_path: '/'
