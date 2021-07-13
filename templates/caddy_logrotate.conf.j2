@@ -12,5 +12,6 @@
     sharedscripts
     prerotate
         test ! -x /usr/sbin/sarg-reports || /usr/sbin/sarg-reports daily
+        /usr/bin/systemctl restart caddy.service
     endscript
 }

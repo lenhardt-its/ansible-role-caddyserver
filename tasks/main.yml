@@ -26,7 +26,7 @@
   become: true
   tags: caddy
 
-- name: create default directories
+- name: create directories
   file:
     path: "{{ item }}"
     state: directory
@@ -138,64 +138,6 @@
   when:
     - ansible_version.full is version_compare('2.4', '>=')
     - ansible_selinux.status == "enabled"
-  become: true
-  tags: caddy
-
-- name: check whether ufw status is active
-  command: "ufw status"
-  changed_when: False
-  ignore_errors: True
-  register: _ufw_status
-  become: true
-  when:
-    - caddy_allow_firewall
-    - ansible_os_family == 'Debian'
-  tags: caddy
-
-- name: check whether firewalld status is active
-  command: "firewall-cmd --state"
-  changed_when: False
-  ignore_errors: True
-  register: _firewalld_status
-  become: true
-  when: ansible_os_family == 'RedHat'
-  tags: caddy
-
-- name: configure ufw
-  community.general.ufw:
-    rule: allow
-    port: "{{ item }}"
-    proto: tcp
-    state: enabled
-    comment: "Caddyserver"
-  changed_when: False
-  ignore_errors: True
-  notify: reload ufw
-  with_items:
-    - 80
-    - 443
-  become: true
-  tags: caddy
-  when:
-    - "'active' in _ufw_status.stdout"
-    - ansible_os_family == 'Debian'
-    - caddy_allow_firewall
-
-- name: configure firewalld
-  firewalld:
-    port: "{{ item }}/tcp"
-    permanent: yes
-    state: true
-  changed_when: False
-  ignore_errors: True
-  with_items:
-    - 80
-    - 443
-  when:
-    - "'running' in _firewalld_status.stdout"
-    - caddy_allow_firewall
-    - ansible_os_family == 'RedHat'
-  notify: reload firewalld
   become: true
   tags: caddy
 

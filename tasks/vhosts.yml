@@ -2,7 +2,7 @@
 - name: "add vhosts for {{ vhost.name }}"
   template:
     src: '{{ vhost.template }}'
-    dest: '{{ caddy_config_path }}/vhosts.d/{{ vhost.name }}'
+    dest: '{{ caddy_config_path }}/vhosts.d/{{ vhost.name }}.conf'
     owner: "{{ caddy_system_user }}"
     group: "{{ caddy_system_group }}"
     mode: 0644
